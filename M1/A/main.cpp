@@ -1,13 +1,12 @@
-/*
+/*! @file main.cpp
 Найдите все вхождения шаблона в строку. Длина шаблона – p, длина строки – n.
 p <= 30000, n <= 300000.
 
 Использовать один из методов:
-(- С помощью префикс-функции)
 - С помощью z-функции.
 
- Время O(n + p)
- Доп. память – O(p).
+Время: O(n + p),
+Доп. память: O(p).
  */
 #include <iostream>
 #include <string>
@@ -19,8 +18,19 @@ using std::endl;
 using std::string;
 using std::vector;
 
-void SubstringSearch(string &patter, string &text, vector<int> &answers);
+/*!
+ * @function SubstringSearch
+ * @param pattern - шаблон
+ * @param text - обрабатываемый текст
+ * @param answers - вектор ответов
+ */
+void SubstringSearch(string &pattern, string &text, vector<int> &answers);
 
+/*!
+ * @function ZFunction
+ * @param text - анализируемый текст
+ * @param z_function - результат z-функции на этом тектсе
+ */
 void ZFunction(string &text, vector<int> &z_function);
 
 int main() {
@@ -38,8 +48,8 @@ int main() {
 }
 
 void SubstringSearch(string &pattern, string &text, vector<int> &answers) {
-    vector<int> z_function_result(pattern.size() + text.size() + 1);
     string full_text = pattern + '#' + text;
+    vector<int> z_function_result(full_text.size());
     ZFunction(full_text, z_function_result);
 
     int pattern_len = pattern.length();
