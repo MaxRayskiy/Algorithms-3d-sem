@@ -19,8 +19,8 @@ class SuffArray {
     unsigned int NumOfDiffStr();
 
  private:
-    void Prepare();
-    void Build();
+    int Prepare();
+    void Build(int class_cnt);
 
     const string str;
     const unsigned int str_len;
@@ -89,8 +89,8 @@ vector<int> LCP::GetLCP() const {
 }
 
 void SuffArray::BuildSuffArray() {
-    Prepare();  //
-    Build();  //
+    int cnt = Prepare();  //
+    Build(cnt);  //
 }
 
 unsigned int SuffArray::NumOfDiffStr() {
@@ -110,7 +110,7 @@ unsigned int SuffArray::NumOfDiffStr() {
     return result;
 }
 
-void SuffArray::Prepare() {
+int SuffArray::Prepare() {
     // counting sort
     int num_by_ch = 0;
     for (unsigned int i = 0; i < str_len; ++i) {
@@ -142,9 +142,10 @@ void SuffArray::Prepare() {
         }
         str_class[p[i]] = class_cnt;
     }
+    return class_cnt;
 }
 
-void SuffArray::Build() {
+void SuffArray::Build(int class_cnt) {
     vector<unsigned int> pn(str_len);
     vector<unsigned int> temp_str_class;
 
@@ -156,7 +157,7 @@ void SuffArray::Build() {
         }
 
         cnt_alpha_pos.clear();
-        cnt_alpha_pos.resize(cnt_alpha_pos.size());
+        cnt_alpha_pos.resize(class_cnt + 1);
         for (auto str_beg : pn) {
             ++cnt_alpha_pos[str_class[str_beg]];
         }
@@ -170,7 +171,7 @@ void SuffArray::Build() {
         }
 
         // define classes
-        int class_cnt = 0;
+        class_cnt = 0;
         temp_str_class.resize(str_len);
         temp_str_class[p[0]] = class_cnt;
 
