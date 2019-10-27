@@ -12,23 +12,27 @@
 using std::string;
 using std::vector;
 
-class SuffArrayByString {
+class SuffArray {
  public:
-    explicit SuffArrayByString(string &str);
+    explicit SuffArray(string &str);
     void BuildSuffArray();
-    unsigned int ReturnNumOfDiffStr();
+    unsigned int NumOfDiffStr();
 
  private:
-    const unsigned int str_len;
+    void Prepare();
+    void Build();
+
     const string str;
+    const unsigned int str_len;
+
     vector<unsigned int> p;
     vector<unsigned int> str_class;
     vector<unsigned int> cnt_alpha_pos;
 };
 
-class LCPBySuffArray {
+class LCP {
  public:
-    LCPBySuffArray(const string &str, const vector<unsigned int> &suff_array);
+    LCP(const string &str, const vector<unsigned int> &suff_array);
     vector<int> GetLCP() const;
 
  private:
@@ -38,21 +42,21 @@ class LCPBySuffArray {
 int main() {
     string str;
     std::cin >> str;
-    SuffArrayByString SuffArray(str);
-    std::cout << SuffArray.ReturnNumOfDiffStr() << std::endl;
+    SuffArray SuffArray(str);
+    std::cout << SuffArray.NumOfDiffStr() << std::endl;
     return 0;
 }
 
-SuffArrayByString::SuffArrayByString(string &str)
-        : str_len(str.length() + 1)
-        , str(str + '$')
-        , p(str.length() + 1)
-        , str_class(str.length() + 1)
-        , cnt_alpha_pos(26 + 1)
+SuffArray::SuffArray(string &str)
+    : str_len(str.length() + 1)
+    , str(str + '$')
+    , p(str.length() + 1)
+    , str_class(str.length() + 1)
+    , cnt_alpha_pos(26 + 1)
 {}
 
-LCPBySuffArray::LCPBySuffArray(const string &str, const vector<unsigned int> &suff_array)
-        : lcp_array(str.length())
+LCP::LCP(const string &str, const vector<unsigned int> &suff_array)
+    : lcp_array(str.length())
 {
     int str_len = str.length();
 
@@ -72,7 +76,7 @@ LCPBySuffArray::LCPBySuffArray(const string &str, const vector<unsigned int> &su
         } else {
             int next_str_beg = suff_array[pos[i] + 1];
             while (std::max(i, next_str_beg) + prev_lcp < str_len
-                        && str[i + prev_lcp] == str[next_str_beg + prev_lcp]) {
+                && str[i + prev_lcp] == str[next_str_beg + prev_lcp]) {
                 ++prev_lcp;
             }
             lcp_array[pos[i]] = prev_lcp;
@@ -80,12 +84,34 @@ LCPBySuffArray::LCPBySuffArray(const string &str, const vector<unsigned int> &su
     }
 }
 
-vector<int> LCPBySuffArray::GetLCP() const {
+vector<int> LCP::GetLCP() const {
     return lcp_array;
 }
 
-void SuffArrayByString::BuildSuffArray() {
-    // first phase
+void SuffArray::BuildSuffArray() {
+    Prepare();  //
+    Build();  //
+}
+
+unsigned int SuffArray::NumOfDiffStr() {
+    if (str_len == 1) {
+        return 0;
+    }
+    BuildSuffArray();
+    LCP LCP(str, p);
+    vector<int> lcp = LCP.GetLCP();
+    unsigned int input_str_len = str_len - 1;  // except '$'
+
+    unsigned int result = 0;
+    for (unsigned int i = 1; i < str_len; ++i) {  // except $ on p[0]; lcp[0] = 0
+        result += input_str_len - p[i] - lcp[i];
+    }
+    result -= 1;  // except '$' in lcp_array[str_len - 1]
+    return result;
+}
+
+void SuffArray::Prepare() {
+    // counting sort
     int num_by_ch = 0;
     for (unsigned int i = 0; i < str_len; ++i) {
         num_by_ch = str[i] - 'a' + 1;
@@ -107,6 +133,7 @@ void SuffArrayByString::BuildSuffArray() {
         p[--cnt_alpha_pos[num_by_ch]]  = i;
     }
 
+    // define classes
     unsigned int class_cnt = 0;
     str_class[p[0]] = 0;
     for (unsigned int i = 1; i < str_len; ++i) {
@@ -115,19 +142,21 @@ void SuffArrayByString::BuildSuffArray() {
         }
         str_class[p[i]] = class_cnt;
     }
+}
 
-    // second phase
+void SuffArray::Build() {
     vector<unsigned int> pn(str_len);
     vector<unsigned int> temp_str_class;
 
     unsigned int half_len = 1;
     while (half_len < str_len) {
+        // counting sort by LSD
         for (unsigned int i = 0; i < str_len; ++i) {
             pn[i] = (str_len + p[i] - half_len) % str_len;
         }
 
         cnt_alpha_pos.clear();
-        cnt_alpha_pos.resize(class_cnt + 1);
+        cnt_alpha_pos.resize(cnt_alpha_pos.size());
         for (auto str_beg : pn) {
             ++cnt_alpha_pos[str_class[str_beg]];
         }
@@ -140,7 +169,8 @@ void SuffArrayByString::BuildSuffArray() {
             p[--cnt_alpha_pos[current_class]] = pn[i];
         }
 
-        class_cnt = 0;
+        // define classes
+        int class_cnt = 0;
         temp_str_class.resize(str_len);
         temp_str_class[p[0]] = class_cnt;
 
@@ -162,21 +192,4 @@ void SuffArrayByString::BuildSuffArray() {
 
         half_len *= 2;
     }
-}
-
-unsigned int SuffArrayByString::ReturnNumOfDiffStr() {
-    if (str_len == 1) {
-        return 0;
-    }
-    BuildSuffArray();
-    LCPBySuffArray LCP(str, p);
-    vector<int> lcp = LCP.GetLCP();
-    unsigned int input_str_len = str_len - 1;  // except '$'
-
-    unsigned int result = 0;
-    for (unsigned int i = 1; i < str_len; ++i) {  // except $ on p[0]; lcp[0] = 0
-        result += input_str_len - p[i] - lcp[i];
-    }
-    result -= 1;  // except '$' in lcp_array[str_len - 1]
-    return result;
 }
