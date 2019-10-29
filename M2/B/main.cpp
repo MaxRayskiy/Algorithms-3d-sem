@@ -25,36 +25,36 @@ class SuffTree {
       int rg;
       bool is_terminal;
 
-      Node *parent;
-      Node *suff_link;
+      Node* parent;
+      Node* suff_link;
       int num;
       std::map<char, Node*> next;
 
-      Node(int lf, int rg, Node *parent);
+      Node(int lf, int rg, Node* parent);
       Node();
     };
 
     struct ActiveNode {
-      Node *node;
+      Node* node;
       char edge;
       int len;
 
       ActiveNode(Node *active_node, char edge, int len);
     };
 
-    Node* AddChar(const char &ch);
-    Node* InsertNode(Node *parent, Node *child, int offset);
-    Node *InsertLeafNode(SuffTree::Node *parent, char ch);
-    Node *GetNextNode(ActiveNode& act_node, char ch) const;
+    Node* AddChar(const char& ch);
+    Node* InsertNode(Node* parent, Node* child, int offset);
+    Node* InsertLeafNode(SuffTree::Node* parent, char ch);
+    Node* GetNextNode(ActiveNode& act_node, char ch) const;
     Node* ProceedToActive(const char& ch);
     Node* ExtendEdge();
     Node* BranchEdge(Node* next_node, const char& ch);
-    int Len(Node *node);
+    int Len(Node* node);
 
     ActiveNode active;
     int reminder;
     int current_size;
-    Node *root;
+    Node* root;
     const std::string str;
     const int separator;
 };
@@ -81,13 +81,13 @@ int main() {
     }
     return 0;
 }
-SuffTree::ActiveNode::ActiveNode(Node *active_node, char edge, int len)
+SuffTree::ActiveNode::ActiveNode(Node* active_node, char edge, int len)
     : node(active_node)
     , edge(edge)
     , len(len)
 {}
 
-SuffTree::Node::Node(int lf, int rg, SuffTree::Node *parent)
+SuffTree::Node::Node(int lf, int rg, SuffTree::Node* parent)
     : lf(lf)
     , rg(rg)
     , is_terminal(true)
@@ -142,14 +142,14 @@ SuffTree::Node* SuffTree::AddChar(const char& ch) {
     }
 }
 
-SuffTree::Node* SuffTree::InsertNode(Node *parent, Node *child, int offset) {
+SuffTree::Node* SuffTree::InsertNode(Node* parent, Node* child, int offset) {
     if (child == nullptr) {  // add another one leaf to the Node "parent"
-        Node *new_node = new Node(current_size - 1, current_size, parent);
+        Node* new_node = new Node(current_size - 1, current_size, parent);
         parent->next[str[current_size - 1]] = new_node;
         return parent;
     } else { // create new Node on the edge  : parent-child => parent-new_parent-child
         //                                                                \_ new_child
-        Node *new_parent = new Node(child->lf, child->lf + offset - 1, parent);
+        Node* new_parent = new Node(child->lf, child->lf + offset - 1, parent);
         parent->next[str[child->lf]] = new_parent;
         new_parent->is_terminal = false;
 
@@ -157,7 +157,7 @@ SuffTree::Node* SuffTree::InsertNode(Node *parent, Node *child, int offset) {
         child->parent = new_parent;
         new_parent->next[str[child->lf]] = child;
 
-        Node *new_child = new Node(current_size - 1, current_size, new_parent);  // is leaf
+        Node* new_child = new Node(current_size - 1, current_size, new_parent);  // is leaf
         new_parent->next[str[new_child->lf]] = new_child;
 
         return new_parent;
@@ -184,14 +184,14 @@ SuffTree::Node* SuffTree::GetNextNode(ActiveNode& act_node, char ch) const {
     return next->second;   // map<char, Node*>
 }
 
-void SuffTree::DumpTree(vector<vector<int>> &result) {
+void SuffTree::DumpTree(vector<vector<int>>& result) {
     result.clear();
     int cnt = 0;
 
     std::stack<Node*> st;
     st.push(root);
     while (!st.empty()) {
-        Node *current_node = st.top();
+        Node* current_node = st.top();
         st.pop();
         current_node->num = cnt;
         ++cnt;
@@ -258,7 +258,7 @@ SuffTree::Node* SuffTree::ProceedToActive(const char& ch) {
     return next_node;
 }
 
-SuffTree::Node *SuffTree::InsertLeafNode(SuffTree::Node* parent, char ch) {
+SuffTree::Node* SuffTree::InsertLeafNode(SuffTree::Node* parent, char ch) {
     Node* inserted_node = InsertNode(active.node, nullptr, 0);
     if (active.node == root) {
         if (active.len > 0) {
@@ -305,7 +305,7 @@ SuffTree::Node* SuffTree::ExtendEdge() {
 }
 
 SuffTree::Node* SuffTree::BranchEdge(Node* next_node, const char& ch) {
-    Node *inserted_node = InsertNode(active.node, next_node, active.len);
+    Node* inserted_node = InsertNode(active.node, next_node, active.len);
     --reminder;
 
     if (active.node == root && active.len > 0) {
