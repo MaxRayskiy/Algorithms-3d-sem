@@ -2,7 +2,7 @@
 Дана строка длины n. Найти количество ее различных подстрок. Используйте суффиксный массив.
 Построение суффиксного массива выполняйте за O(n log n).
 Вычисление количества различных подстрок выполняйте за O(n).
- */
+*/
 
 #include <algorithm>
 #include <iostream>
@@ -14,13 +14,14 @@ using std::vector;
 
 class SuffArray {
  public:
-    explicit SuffArray(string &str);
+    explicit SuffArray(const string& str);
     void BuildSuffArray();
     unsigned int NumOfDiffStr();
 
  private:
     int Prepare();
     void Build(int class_cnt);
+    vector<unsigned int> UpdateClasses(unsigned int half_len);
 
     const string str;
     const unsigned int str_len;
@@ -47,7 +48,7 @@ int main() {
     return 0;
 }
 
-SuffArray::SuffArray(string &str)
+SuffArray::SuffArray(const string& str)
     : str_len(str.length() + 1)
     , str(str + '$')
     , p(str.length() + 1)
@@ -134,7 +135,7 @@ int SuffArray::Prepare() {
     }
 
     // define classes
-    unsigned int class_cnt = 0;
+    int class_cnt = 0;
     str_class[p[0]] = 0;
     for (unsigned int i = 1; i < str_len; ++i) {
         if (str[p[i]] != str[p[i - 1]]) {
@@ -147,7 +148,6 @@ int SuffArray::Prepare() {
 
 void SuffArray::Build(int class_cnt) {
     vector<unsigned int> pn(str_len);
-    vector<unsigned int> temp_str_class;
 
     unsigned int half_len = 1;
     while (half_len < str_len) {
@@ -170,27 +170,29 @@ void SuffArray::Build(int class_cnt) {
             p[--cnt_alpha_pos[current_class]] = pn[i];
         }
 
-        // define classes
-        class_cnt = 0;
-        temp_str_class.resize(str_len);
-        temp_str_class[p[0]] = class_cnt;
-
-        for (int i = 1; i < str_len; ++i) {
-            if (str_class[p[i]] == str_class[p[i - 1]]) {
-                unsigned int lhv_str_sec_pos = (p[i - 1] + half_len) % str_len;
-                unsigned int rhv_str_sec_pos = (p[i] + half_len) % str_len;
-
-                if (str_class[lhv_str_sec_pos] == str_class[rhv_str_sec_pos]) {
-                    temp_str_class[p[i]] = class_cnt;
-                    continue;
-                }
-            }
-            temp_str_class[p[i]] = ++class_cnt;
-        }
-
-        str_class = std::move(temp_str_class);
-        temp_str_class.clear();
+        str_class = std::move(UpdateClasses(half_len));
+        class_cnt = static_cast<int>(str_class.size() + 1);
 
         half_len *= 2;
     }
+}
+
+vector<unsigned int> SuffArray::UpdateClasses(unsigned int half_len) {
+    int class_cnt = 0;
+    vector<unsigned int> temp_str_class(str_len);
+    temp_str_class[p[0]] = class_cnt;
+
+    for (int i = 1; i < str_len; ++i) {
+        if (str_class[p[i]] == str_class[p[i - 1]]) {
+            unsigned int lhv_str_sec_pos = (p[i - 1] + half_len) % str_len;
+            unsigned int rhv_str_sec_pos = (p[i] + half_len) % str_len;
+
+            if (str_class[lhv_str_sec_pos] == str_class[rhv_str_sec_pos]) {
+                temp_str_class[p[i]] = class_cnt;
+                continue;
+            }
+        }
+        temp_str_class[p[i]] = ++class_cnt;
+    }
+    return temp_str_class;
 }
