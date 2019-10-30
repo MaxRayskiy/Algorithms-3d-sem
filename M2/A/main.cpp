@@ -126,7 +126,7 @@ int SuffArray::Prepare() {
         cnt_alpha_pos[i] += cnt_alpha_pos[i - 1];
     }
 
-    for (int i = str_len - 1; i >= 0; --i) {
+    for (unsigned int i = 0; i < str_len; ++i) {
         num_by_ch = str[i] - 'a' + 1;
         if (num_by_ch < 0) {
             num_by_ch = 0;
