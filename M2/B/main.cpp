@@ -21,8 +21,8 @@ class SuffTree {
 
  private:
     struct Node {
-      int lf;
-      int rg;
+      int lf;   //  left (or first) index of char in the str
+      int rg;   //  right (or last) index of char in the str
       bool is_terminal;
 
       Node* parent;
@@ -44,7 +44,7 @@ class SuffTree {
 
     Node* AddChar(const char& ch);
     Node* InsertNode(Node* parent, Node* child, int offset);
-    Node* InsertLeafNode(SuffTree::Node* parent, char ch);
+    SuffTree::Node* InsertLeafNode(char ch);
     Node* GetNextNode(ActiveNode& act_node, char ch) const;
     Node* ProceedToActive(const char& ch);
     Node* ExtendEdge();
@@ -67,7 +67,6 @@ int main() {
     std::cin >> s >> t;
     SuffTree Tree(s, t);
     Tree.BuildSuffTree();
-    vector<vector<int>> check;
 
     std::vector<std::vector<int>> result;
     Tree.DumpTree(result);
@@ -132,7 +131,7 @@ SuffTree::Node* SuffTree::AddChar(const char& ch) {
     Node *next_node = ProceedToActive(ch);  // move to real active node
 
     if (next_node == nullptr) {
-        return InsertLeafNode(active.node, ch);
+        return InsertLeafNode(ch);
     }
     if (str[next_node->lf + active.len] == ch) {  // ch is on the edge
         active.edge = str[next_node->lf];
@@ -258,7 +257,7 @@ SuffTree::Node* SuffTree::ProceedToActive(const char& ch) {
     return next_node;
 }
 
-SuffTree::Node* SuffTree::InsertLeafNode(SuffTree::Node* parent, char ch) {
+SuffTree::Node* SuffTree::InsertLeafNode(char ch) {
     Node* inserted_node = InsertNode(active.node, nullptr, 0);
     if (active.node == root) {
         if (active.len > 0) {
