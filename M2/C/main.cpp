@@ -58,9 +58,9 @@ int main() {
 }
 
 SuffArray::SuffArray(const string& str1, const string& str2)
-    : str_len(str1.length() + str2.length() + 2)
-    , str(str1 + '{' + str2 + '$')
+    : str(str1 + '{' + str2 + '$')
     , separator(str1.size())
+    , str_len(str1.length() + str2.length() + 2)
     , p(str1.length() + str2.length() + 2)
     , str_class(str1.length() + str2.length() + 2)
     , cnt_alpha_pos(26 + 2)
