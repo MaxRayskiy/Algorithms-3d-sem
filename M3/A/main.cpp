@@ -55,17 +55,14 @@ int main() {
 }
 
 double FindDist(LineSegment FirstSegment, LineSegment SecondSegment) {
+    //  ternary search
     Point First =  FirstSegment.FirstPoint;
     Point Second = FirstSegment.SecondPoint;
-
-    if (CalcDist(First, Second) <= EPS) {
-        return CalcDist(FindClosestPointOnSegment(SecondSegment, First), )
-    }
 
     Point Result(0,0,0);
 
     while(CalcDist(First, Second) > EPS) {
-
+        //  divide FirstSegment in 3 parts by Midle1 and Midle2 :  First --- Midle1 --- Midle2 --- Second
         Point Midle1(First.x * 2 / 3 + Second.x / 3,
                      First.y * 2 / 3 + Second.y / 3,
                      First.z * 2 / 3 + Second.z / 3);
@@ -74,18 +71,19 @@ double FindDist(LineSegment FirstSegment, LineSegment SecondSegment) {
                      First.y * 1 / 3 + Second.y * 2 / 3,
                      First.z * 1 / 3 + Second.z * 2 / 3);
 
-        Point SecondSegmentPoint1 = FindClosestPointOnSegment(SecondSegment, Midle1);
-        Point SecondSegmentPoint2 = FindClosestPointOnSegment(SecondSegment, Midle2);
+        Point SecondSegmentPoint1 = FindClosestPointOnSegment(SecondSegment, Midle1);  //  closest point to Midle1
+        Point SecondSegmentPoint2 = FindClosestPointOnSegment(SecondSegment, Midle2);  //  closest point to Midle2
 
+        //  Cut one part of segment
         if (CalcDist(Midle1, SecondSegmentPoint1) < CalcDist(Midle2, SecondSegmentPoint2)) {
             FirstSegment.SecondPoint = Midle2;
+            Second = Midle2;
             Result = SecondSegmentPoint1;
         } else {
             FirstSegment.FirstPoint = Midle1;
+            First = Midle1;
             Result = SecondSegmentPoint2;
         }
-        First =  FirstSegment.FirstPoint;
-        Second = FirstSegment.SecondPoint;
     }
 
     if (CalcDist(First, Result) > CalcDist(FirstSegment.FirstPoint,  SecondSegment.FirstPoint)) {
@@ -105,10 +103,12 @@ double FindDist(LineSegment FirstSegment, LineSegment SecondSegment) {
 }
 
 Point FindClosestPointOnSegment(LineSegment& Segment, Point& Dot) {
+    //  ternary search
     Point First =  Segment.FirstPoint;
     Point Second = Segment.SecondPoint;
 
     while (CalcDist(First, Second) > EPS) {
+        //  divide Segment in 3 parts by Midle1 and Midle2 :  First --- Midle1 --- Midle2 --- Second
         Point Midle1(First.x * 2 / 3 + Second.x / 3,
                      First.y * 2 / 3 + Second.y / 3,
                      First.z * 2 / 3 + Second.z / 3);
@@ -118,6 +118,7 @@ Point FindClosestPointOnSegment(LineSegment& Segment, Point& Dot) {
                      First.z / 3 + Second.z * 2 / 3);
 
 
+        //  Cut one part of segment
         if (CalcDist(Dot, Midle1) < CalcDist(Dot, Midle2)) {
             Second = Midle2;
         } else {
