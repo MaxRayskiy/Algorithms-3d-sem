@@ -2,12 +2,12 @@
  Даны два отрезка в пространстве (x1, y1, z1) - (x2, y2, z2) и (x3, y3, z3) - (x4, y4, z4).
  Найдите расстояние между отрезками.
  */
-
+#include <algorithm>
 #include <cmath>
 #include <iomanip>
 #include <iostream>
 
-static double EPS = 0.000001;
+static double EPS = 1e-6;
 
 struct Point {
   double x, y ,z;
@@ -30,22 +30,22 @@ double CalcDist(Point& first_point, Point& second_point) {
 
 Point FindClosestPointOnSegment(LineSegment& Segment, Point& Dot);
 
-double FindDist(LineSegment FirstSegment, LineSegment SecondSegment);
+double FindDist(LineSegment& FirstSegment, LineSegment& SecondSegment);
 
 int main() {
-    double      x,   y,   z;
+    double x, y, z;
 
     std::cin >> x >> y >> z;
-    Point A (   x,   y,   z);
+    Point A (x, y, z);
 
     std::cin >> x >> y >> z;
-    Point B (   x,   y,   z);
+    Point B (x, y, z);
 
     std::cin >> x >> y >> z;
-    Point C (   x,   y,   z);
+    Point C (x, y, z);
 
     std::cin >> x >> y >> z;
-    Point D (   x,   y,   z);
+    Point D (x, y, z);
 
     LineSegment FirstSegment(A, B);
     LineSegment SecondSegment(C, D);
@@ -54,7 +54,7 @@ int main() {
     return 0;
 }
 
-double FindDist(LineSegment FirstSegment, LineSegment SecondSegment) {
+double FindDist(LineSegment& FirstSegment, LineSegment& SecondSegment) {
     //  ternary search
     Point First =  FirstSegment.FirstPoint;
     Point Second = FirstSegment.SecondPoint;
@@ -86,20 +86,13 @@ double FindDist(LineSegment FirstSegment, LineSegment SecondSegment) {
         }
     }
 
-    if (CalcDist(First, Result) > CalcDist(FirstSegment.FirstPoint,  SecondSegment.FirstPoint)) {
-        return CalcDist(FirstSegment.FirstPoint,  SecondSegment.FirstPoint);
-    }
-    if (CalcDist(First, Result) > CalcDist(FirstSegment.FirstPoint,  SecondSegment.SecondPoint)) {
-        return CalcDist(FirstSegment.FirstPoint,  SecondSegment.SecondPoint);
-    }
-    if (CalcDist(First, Result) > CalcDist(FirstSegment.SecondPoint, SecondSegment.FirstPoint)) {
-        return CalcDist(FirstSegment.SecondPoint, SecondSegment.FirstPoint);
-    }
-    if (CalcDist(First, Result) > CalcDist(FirstSegment.SecondPoint, SecondSegment.SecondPoint)) {
-        return CalcDist(FirstSegment.SecondPoint, SecondSegment.SecondPoint);
-    }
+//    return CalcDist(First, Result);
+    return std::min(std::min(std::min(CalcDist(FirstSegment.FirstPoint, SecondSegment.SecondPoint),
+                                      CalcDist(FirstSegment.FirstPoint, SecondSegment.FirstPoint)),
+                             std::min(CalcDist(FirstSegment.SecondPoint, SecondSegment.SecondPoint),
+                                      CalcDist(FirstSegment.SecondPoint, SecondSegment.FirstPoint))),
+                    CalcDist(First, Result));
 
-    return CalcDist(First, Result);
 }
 
 Point FindClosestPointOnSegment(LineSegment& Segment, Point& Dot) {
